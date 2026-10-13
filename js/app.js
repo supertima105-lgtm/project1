@@ -1399,15 +1399,62 @@ const App = {
     const config = AuthDB.getCloudConfig() || { url: '', anonKey: '' };
     document.getElementById('settings-supabase-url').value = config.url || '';
     document.getElementById('settings-supabase-key').value = config.anonKey || '';
-    document.getElementById('settings-gemini-key').value = AIEngine.getApiKey();
+    document.getElementById('settings-gemini-key').value = AIEngine.getApiKey() || '';
+    
+    const statusEl = document.getElementById('gemini-key-status');
+    if (statusEl) {
+      const key = AIEngine.getApiKey();
+      if (key && key.length > 15) {
+        statusEl.innerHTML = '🔑 Сохранен ключ Gemini. Нажмите «Тест» для проверки связи.';
+        statusEl.style.color = 'var(--text-muted)';
+      } else {
+        statusEl.innerHTML = '✨ Люми отвечает динамически! Если ключ не указан, работает умный встроенный ИИ.';
+        statusEl.style.color = 'var(--text-muted)';
+      }
+    }
+
     document.getElementById('settings-modal').classList.add('active');
+  },
+
+  async testGeminiKey() {
+    const input = document.getElementById('settings-gemini-key');
+    const statusEl = document.getElementById('gemini-key-status');
+    const key = input ? input.value.trim() : '';
+
+    if (!key) {
+      if (statusEl) {
+        statusEl.innerHTML = '⚠️ Пожалуйста, введите ключ Google Gemini перед тестированием.';
+        statusEl.style.color = '#EA580C';
+      }
+      return;
+    }
+
+    if (statusEl) {
+      statusEl.innerHTML = '⏳ Проверяем ключ на серверах Google Gemini...';
+      statusEl.style.color = 'var(--primary)';
+    }
+
+    const res = await AIEngine.testKey(key);
+    if (res.ok) {
+      if (statusEl) {
+        statusEl.innerHTML = `✅ Ключ активен! Модель <strong>${res.model}</strong> готова к работе.`;
+        statusEl.style.color = '#16A34A';
+      }
+      this.showInAppToast('Ключ подтвержден! ✅', `Сервер Gemini ответил успешно (${res.model})`, '🤖');
+    } else {
+      if (statusEl) {
+        statusEl.innerHTML = `⚠️ Ошибка проверки: ${res.error}.<br>(Люми продолжит отвечать через умный встроенный ИИ).`;
+        statusEl.style.color = '#EA580C';
+      }
+      this.showInAppToast('Ошибка ключа', res.error, '⚠️');
+    }
   },
 
   closeSettingsModal() {
     document.getElementById('settings-modal').classList.remove('active');
   },
 
-  saveSettings() {
+  async saveSettings() {
     const url = document.getElementById('settings-supabase-url').value.trim();
     const anonKey = document.getElementById('settings-supabase-key').value.trim();
     const geminiKey = document.getElementById('settings-gemini-key').value.trim();
@@ -1415,7 +1462,7 @@ const App = {
     AuthDB.saveCloudConfig(url, anonKey);
     AIEngine.setApiKey(geminiKey);
 
-    this.showInAppToast('Настройки сохранены', 'Облачная БД и ключ Gemini обновлены', '⚙️');
+    this.showInAppToast('Настройки сохранены', 'Конфигурация облака и ИИ обновлена', '⚙️');
     this.closeSettingsModal();
   },
 

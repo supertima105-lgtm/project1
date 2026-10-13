@@ -229,6 +229,9 @@
             <button class="btn-3d btn-outline" style="font-size: 13px; padding: 12px; width: 100%;" onclick="App.showAuthModal()">
               Сменить аккаунт
             </button>
+            <button class="btn-3d btn-outline" style="font-size: 13px; padding: 12px; width: 100%;" onclick="App.showSettingsModal()">
+              ⚙️ Настройки API & Ключ ИИ
+            </button>
           </div>
         </div>
 
@@ -408,19 +411,32 @@
     <!-- SETTINGS MODAL -->
     <div class="modal-overlay" id="settings-modal">
       <div class="modal-box">
-        <h2 style="font-weight: 900; font-size: 20px; margin-bottom: 6px;">Облако & ИИ API</h2>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-          Настройки облачной базы Supabase и ключа нейросети Gemini.
+        <h2 style="font-weight: 900; font-size: 20px; margin-bottom: 6px;">Облако & ИИ Люми 🦊</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Настройки облачной базы данных и ключа нейросети Google Gemini.
         </p>
+
+        <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Google Gemini API Key</label>
+        <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+          <input type="password" id="settings-gemini-key" class="input-field" style="margin-bottom: 0;" placeholder="Вставьте ключ AI Studio...">
+          <button type="button" class="btn-3d btn-primary" style="width: auto; padding: 0 14px; font-size: 12px; white-space: nowrap;" onclick="App.testGeminiKey()">
+            🔍 Тест
+          </button>
+        </div>
+        <div id="gemini-key-status" style="font-size: 11px; margin-bottom: 12px; font-weight: 700; color: var(--text-muted);">
+          ✨ Люми отвечает динамически! Если ключ не указан или заблокирован, работает умный встроенный ИИ.
+        </div>
+        <div style="margin-bottom: 14px;">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: var(--primary); font-weight: 800; text-decoration: underline;">
+            🔑 Получить бесплатный ключ в Google AI Studio ↗
+          </a>
+        </div>
 
         <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Supabase URL</label>
         <input type="text" id="settings-supabase-url" class="input-field" placeholder="https://xyz.supabase.co">
 
         <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Supabase Anon Key</label>
         <input type="password" id="settings-supabase-key" class="input-field" placeholder="eyJhbGciOiJIUzI1NiIs...">
-
-        <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Google Gemini API Key</label>
-        <input type="password" id="settings-gemini-key" class="input-field" placeholder="AQ.Ab8...">
 
         <div style="display: flex; gap: 8px; margin-top: 10px;">
           <button class="btn-3d btn-success" onclick="App.saveSettings()">Сохранить</button>
