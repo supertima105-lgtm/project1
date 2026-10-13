@@ -222,7 +222,10 @@
           </div>
 
           <!-- Profile Actions -->
-          <div style="margin-top: 10px;">
+          <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn-3d btn-primary" style="font-size: 13px; padding: 12px; width: 100%;" onclick="App.showPhoneSyncModal()">
+              📱 Войти с телефона (QR-код)
+            </button>
             <button class="btn-3d btn-outline" style="font-size: 13px; padding: 12px; width: 100%;" onclick="App.showAuthModal()">
               Сменить аккаунт
             </button>
@@ -365,15 +368,24 @@
         </div>
 
         <!-- Email Field (Used in registration and login) -->
-        <div id="auth-field-email-wrap" style="margin-bottom: 8px;">
+        <div id="auth-field-email-wrap" style="margin-bottom: 6px;">
           <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;" id="auth-email-label">Почта (Email) или Логин</label>
-          <input type="text" id="auth-email-input" class="input-field" placeholder="student@gmail.com" autocomplete="email">
+          <input type="text" id="auth-email-input" class="input-field" placeholder="student@gmail.com" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <!-- Quick Mobile Domain Chips -->
+          <div class="email-domain-chips">
+            <button type="button" class="domain-chip" onclick="App.appendEmailDomain('@gmail.com')">+ @gmail.com</button>
+            <button type="button" class="domain-chip" onclick="App.appendEmailDomain('@mail.ru')">+ @mail.ru</button>
+            <button type="button" class="domain-chip" onclick="App.appendEmailDomain('@yandex.ru')">+ @yandex.ru</button>
+          </div>
         </div>
 
-        <!-- Password Field -->
+        <!-- Password Field with Visibility Toggle -->
         <div style="margin-bottom: 6px;">
           <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Пароль</label>
-          <input type="password" id="auth-pass-input" class="input-field" placeholder="••••" autocomplete="current-password">
+          <div class="password-input-wrapper">
+            <input type="password" id="auth-pass-input" class="input-field" placeholder="••••" autocomplete="current-password">
+            <button type="button" class="btn-toggle-pass" id="btn-toggle-pass" onclick="App.togglePasswordVisibility()" title="Показать/скрыть пароль">👁️</button>
+          </div>
         </div>
 
         <div style="font-size: 11px; color: #16A34A; font-weight: 700; margin-top: 4px; margin-bottom: 12px;" id="auth-note-text">
@@ -383,6 +395,12 @@
         <div style="display: flex; gap: 8px; margin-top: 4px;">
           <button class="btn-3d btn-primary" id="btn-auth-submit" style="flex: 1;" onclick="App.handleAuthSubmit()">Войти</button>
           <button class="btn-3d btn-outline" id="btn-auth-cancel" style="width: auto; padding: 12px 18px;" onclick="App.closeAuthModal()">Отмена</button>
+        </div>
+
+        <div style="margin-top: 12px; text-align: center; border-top: 1px dashed #E2E8F0; padding-top: 10px;">
+          <button type="button" class="btn-3d btn-outline" style="font-size: 12px; padding: 10px 14px; width: 100%; background: #F8FAFC;" onclick="App.loginAsGuest()">
+            🎮 Войти без регистрации (Быстрый старт)
+          </button>
         </div>
       </div>
     </div>
@@ -407,6 +425,31 @@
         <div style="display: flex; gap: 8px; margin-top: 10px;">
           <button class="btn-3d btn-success" onclick="App.saveSettings()">Сохранить</button>
           <button class="btn-3d btn-outline" onclick="App.closeSettingsModal()">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE SYNC QR MODAL (ВХОД С ТЕЛЕФОНА В 1 КЛИК) -->
+    <div class="modal-overlay" id="phone-sync-modal" onclick="App.closePhoneSyncModal()">
+      <div class="phone-sync-box" onclick="event.stopPropagation()">
+        <h2 style="font-weight: 900; font-size: 20px; margin-bottom: 4px;">📱 Вход с телефона</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+          Наведите камеру телефона на QR-код для мгновенного входа без логина и пароля:
+        </p>
+
+        <img id="phone-sync-qr-img" class="qr-code-img" src="" alt="QR Code">
+
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Или отправьте прямую ссылку в мессенджер:
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="btn-3d btn-primary" onclick="App.copyPhoneSyncLink()">
+            📋 Скопировать ссылку для входа
+          </button>
+          <button class="btn-3d btn-outline" onclick="App.closePhoneSyncModal()">
+            Закрыть
+          </button>
         </div>
       </div>
     </div>

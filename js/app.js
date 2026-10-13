@@ -17,8 +17,27 @@ const App = {
     this.bindEvents();
     this.initConfetti();
 
-    // Enforce email registration on first visit from any device
-    if (!AuthDB.isLoggedInWithEmail()) {
+    // 1. Check for 1-Click QR Code / Magic Link Login from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const quickAuth = urlParams.get('quick_auth');
+    if (quickAuth) {
+      try {
+        const creds = JSON.parse(decodeURIComponent(atob(quickAuth)));
+        if (creds && creds.email) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+          const loginRes = await AuthDB.login(creds.email, creds.pass || '');
+          if (!loginRes.success) {
+            await AuthDB.register(creds.name || 'Ученик', creds.email, creds.pass || '');
+          }
+          this.showInAppToast('Вход по QR-коду! 📱', `С возвращением, ${AuthDB.currentUser?.name}!`, '✨');
+        }
+      } catch (err) {
+        console.warn('Quick auth parse error:', err);
+      }
+    }
+
+    // 2. Check if user is authenticated (email or guest)
+    if (!AuthDB.currentUser) {
       this.showAuthModal(true);
       return;
     }
@@ -1296,6 +1315,84 @@ const App = {
   // Backward compatibility alias
   async handleLoginOrCreate() {
     return this.handleAuthSubmit();
+  },
+
+  appendEmailDomain(domain) {
+    const input = document.getElementById('auth-email-input');
+    if (!input) return;
+    let val = input.value.trim();
+    if (val.includes('@')) {
+      val = val.split('@')[0];
+    }
+    input.value = val ? `${val}${domain}` : domain.replace('@', '');
+    input.focus();
+  },
+
+  togglePasswordVisibility() {
+    const passInput = document.getElementById('auth-pass-input');
+    const eyeBtn = document.getElementById('btn-toggle-pass');
+    if (!passInput) return;
+    if (passInput.type === 'password') {
+      passInput.type = 'text';
+      if (eyeBtn) eyeBtn.innerText = '🙈';
+    } else {
+      passInput.type = 'password';
+      if (eyeBtn) eyeBtn.innerText = '👁️';
+    }
+  },
+
+  loginAsGuest() {
+    AuthDB.registerGuest();
+    this.isAuthMandatory = false;
+    this.closeAuthModal();
+    this.updateTopBarStats();
+    this.renderRoadmap();
+    this.renderQuests();
+    this.renderShop();
+    this.renderLumiRoom();
+    this.renderProfile();
+    this.showInAppToast('Гостевой режим 🎮', 'Вы вошли как Гость. Привязать почту можно в любой момент в Профиле!', '🦊');
+  },
+
+  _phoneSyncUrl: '',
+
+  showPhoneSyncModal() {
+    const user = AuthDB.currentUser;
+    if (!user || !user.email) {
+      this.showInAppToast('Сначала войдите', 'Зарегистрируйтесь с почтой, чтобы войти с телефона в 1 клик!', '⚠️');
+      this.showAuthModal(false);
+      return;
+    }
+
+    const payload = {
+      email: user.email,
+      pass: user.password || '',
+      name: user.name || 'Ученик'
+    };
+    const token = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const directUrl = `${window.location.origin}${window.location.pathname}?quick_auth=${token}`;
+    this._phoneSyncUrl = directUrl;
+
+    const qrImg = document.getElementById('phone-sync-qr-img');
+    if (qrImg) {
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(directUrl)}`;
+    }
+
+    document.getElementById('phone-sync-modal')?.classList.add('active');
+  },
+
+  closePhoneSyncModal() {
+    document.getElementById('phone-sync-modal')?.classList.remove('active');
+  },
+
+  async copyPhoneSyncLink() {
+    if (!this._phoneSyncUrl) return;
+    try {
+      await navigator.clipboard.writeText(this._phoneSyncUrl);
+      this.showInAppToast('Ссылка скопирована! 📋', 'Отправьте ссылку себе в Telegram или WhatsApp и откройте на телефоне', '🚀');
+    } catch (e) {
+      prompt('Скопируйте ссылку для входа с телефона:', this._phoneSyncUrl);
+    }
   },
 
   showSettingsModal() {

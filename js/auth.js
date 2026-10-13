@@ -46,11 +46,10 @@ const AuthDB = {
     const currentId = localStorage.getItem(this.CURRENT_USER_KEY);
     if (currentId) {
       const user = this.getUserById(currentId);
-      // Only keep user logged in if they have a registered email
-      if (user && user.email && user.email.includes('@')) {
+      // Keep user logged in if they have email or chose guest mode
+      if (user && ((user.email && user.email.includes('@')) || user.id.startsWith('guest_') || user.isGuest)) {
         this.currentUser = user;
       } else {
-        // Discard legacy/guest users without email
         this.currentUser = null;
         localStorage.removeItem(this.CURRENT_USER_KEY);
       }
@@ -220,6 +219,44 @@ const AuthDB = {
     this.setCurrentUser(userId);
     await this.syncWithCloud(newUser);
     return { success: true, user: newUser, alreadyExisted: false, deviceReset: false };
+  },
+
+  /**
+   * Quick guest registration for immediate play without credentials
+   */
+  registerGuest() {
+    const users = this.getAllUsers();
+    const guestId = 'guest_' + Date.now();
+    const guestUser = {
+      id: guestId,
+      name: 'Гость',
+      email: '',
+      login: 'guest_' + Math.random().toString(36).substring(2, 6),
+      password: '',
+      createdAt: new Date().toISOString(),
+      hearts: 5,
+      maxHearts: 5,
+      gems: 50,
+      xp: 0,
+      streak: 1,
+      lastActiveDate: new Date().toDateString(),
+      completedLevels: [],
+      streakFreezeActive: false,
+      doubleRewardsPotions: 0,
+      questsProgress: {},
+      claimedQuests: [],
+      claimedChests: [],
+      marathonClaimed: false,
+      achievements: [],
+      lastDeviceId: this.getDeviceId(),
+      chatHistory: [
+        { sender: 'bot', text: 'Привет! Я Лисёнок Люми 🦊 Вы вошли как Гость. Привязать почту можно в любой момент в Профиле!' }
+      ]
+    };
+    users[guestId] = guestUser;
+    localStorage.setItem(this.USERS_DB_KEY, JSON.stringify(users));
+    this.setCurrentUser(guestId);
+    return guestUser;
   },
 
   /**
