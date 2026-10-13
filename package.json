@@ -1,0 +1,11 @@
+{
+  "name": "foxical-english",
+  "version": "1.0.0",
+  "description": "Foxical - English Learning Web Application with Lumi Fox & Supabase Cloud",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1"
+  }
+}

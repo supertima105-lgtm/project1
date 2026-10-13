@@ -1,0 +1,16 @@
+{
+  "name": "Foxical — Английский с Лисёнком Люми",
+  "short_name": "Foxical",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F7F8FC",
+  "theme_color": "#FF6F00",
+  "description": "Мобильное приложение Foxical для изучения английского языка с игровым лисёнком Люми",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
